@@ -1,0 +1,142 @@
+#!/bin/bash
+
+printf """
+----------------------------------------------------------------------------------------------
+
+Komodoro: A KDE-native unskippable anti-PC-Addiction timer.
+
+This script will install a systemd service and timer
+that locks the screen every 30 minutes until you did a pause.
+
+----------------------------------------------------------------------------------------------
+
+"""
+
+read -p "Do you want to proceed? (y/n) " answer
+
+if [[ $answer == "y" || $answer == "Y" ]]; then
+    # Create komodoro script
+    
+    
+    # Create Screen Lock script -------------------------------------
+    
+    
+    cat > ~/.local/share/kservices5/komodoro << EOF
+#!/bin/bash
+
+# Lock the screen -----------------------------------
+loginctl lock-session
+
+# fallback if command didnt work
+if [ $? -ne 0 ]; then
+    qdbus org.kde.screensaver /ScreenSaver Lock
+fi
+
+
+
+# Show a notification with countdown time ------------------------------
+
+
+
+notify-send -t 6000 "Screen locked" "Take a break for 5 minutes"
+sleep 60 # Wait for 1 minute
+notify-send -t 6000 "Screen locked" "Take a break for 4 minutes"
+sleep 60 # Wait for 1 minute
+notify-send -t 6000 "Screen locked" "Take a break for 3 minutes"
+sleep 60 # Wait for 1 minute
+notify-send -t 6000 "Screen locked" "Take a break for 2 minutes"
+sleep 60 # Wait for 1 minute
+notify-send -t 6000 "Screen locked" "Take a break for 1 minute"
+sleep 60 # Wait for 1 minute
+EOF
+
+
+
+chmod +x ~/.local/share/kservices5/komodoro
+
+
+
+
+# Create komodoro.service -------------------------------------------
+
+
+
+
+    cat > ~/.config/systemd/user/komodoro.service << EOF
+[Unit]
+Description=Lock screen after 30 minutes of usage
+
+[Service]
+Type=simple
+ExecStart=/bin/bash ~/.local/share/kservices5/komodoro
+
+[Install]
+WantedBy=default.target
+EOF
+
+
+
+# Create komodoro.timer ------------------------------------
+
+
+
+    cat > ~/.config/systemd/user/komodoro.timer << EOF
+[Unit]
+Description=Lock screen every 30 minutes
+
+[Timer]
+OnBootSec=30min
+OnUnitActiveSec=30min
+Unit=komodoro.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+
+
+
+# Enable and start the timer ----------------------------------
+    systemctl --user enable komodoro.timer
+    systemctl --user start komodoro.timer
+
+
+
+
+# Create Uninstaller ---------------------------------------------
+
+
+
+cat > ~/.local/bin/komodoro-remove << EOF
+#!/bin/bash
+
+uninstall_komodoro() {
+    systemctl --user enable komodoro.timer
+    systemctl --user start komodoro.timer
+    rm ~/.local/share/kservices5/komodoro
+    rm ~/.config/systemd/user/komodoro.service
+    "
+}
+
+while true; do
+    read -p "Do you really want to uninstall Komodoro? (y/n) > " yn
+    case $yn in
+        [Yy]* ) uninstall_komodoro && break;;
+        [Nn]* ) echo "Uninstallation cancelled." && break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+EOF
+
+chmod +x ~/.local/bin/komodoro-remove
+
+
+
+# Loop end-------------------------------
+
+
+    echo "Service and timer installed successfully. Make a break in 30min."
+else
+    echo "Service installation canceled."
+fi

@@ -16,15 +16,10 @@ read -p "Do you want to proceed? (y/n) " answer
 
 if [[ $answer == "y" || $answer == "Y" ]]; then
     # Create komodoro script
-    
-    
-    # Create Screen Lock script -------------------------------------
-    
-    
     cat > ~/.local/share/kservices5/komodoro << EOF
 #!/bin/bash
 
-# Lock the screen -----------------------------------
+# Lock the screen
 loginctl lock-session
 
 # fallback if command didnt work
@@ -33,11 +28,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-
 # Show a notification with countdown time ------------------------------
-
-
-
 notify-send -t 6000 "Screen locked" "Take a break for 5 minutes"
 sleep 60 # Wait for 1 minute
 notify-send -t 6000 "Screen locked" "Take a break for 4 minutes"
@@ -50,18 +41,9 @@ notify-send -t 6000 "Screen locked" "Take a break for 1 minute"
 sleep 60 # Wait for 1 minute
 EOF
 
-
-
 chmod +x ~/.local/share/kservices5/komodoro
 
-
-
-
 # Create komodoro.service -------------------------------------------
-
-
-
-
     cat > ~/.config/systemd/user/komodoro.service << EOF
 [Unit]
 Description=Lock screen after 30 minutes of usage
@@ -74,12 +56,7 @@ ExecStart=/bin/bash ~/.local/share/kservices5/komodoro
 WantedBy=default.target
 EOF
 
-
-
 # Create komodoro.timer ------------------------------------
-
-
-
     cat > ~/.config/systemd/user/komodoro.timer << EOF
 [Unit]
 Description=Lock screen every 30 minutes
@@ -94,47 +71,61 @@ WantedBy=timers.target
 EOF
 
 
+# Create komodoro-stop script -------------------------------
 
-
-# Enable and start the timer ----------------------------------
-    systemctl --user enable komodoro.timer
-    systemctl --user start komodoro.timer
-
-
-
-
-# Create Uninstaller ---------------------------------------------
-
-
-
-cat > ~/.local/bin/komodoro-remove << EOF
+    cat > ~/.local/share/kservices5/komodoro-pause << EOF
 #!/bin/bash
 
-uninstall_komodoro() {
-    systemctl --user enable komodoro.timer
-    systemctl --user start komodoro.timer
-    rm ~/.local/share/kservices5/komodoro
-    rm ~/.config/systemd/user/komodoro.service
-    "
-}
+# This script gets launched by the Appstarter and stops the screensaving service for
 
-while true; do
-    read -p "Do you really want to uninstall Komodoro? (y/n) > " yn
-    case $yn in
-        [Yy]* ) uninstall_komodoro && break;;
-        [Nn]* ) echo "Uninstallation cancelled." && break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+
+# Subtract 30 minutes from inputted timespan, or set it 0 (because the service waits 30min before stopping)
+
+if [[ $duration -ge 30 ]]; then
+    new_duration=$((duration - 30))
+else
+    duration=0
+fi
+
+
+
+# Convert the duration to seconds
+duration=$((duration * 60))
+
+
+# Pause the komodoro service
+
+systemctl --user stop komodoro.timer
+
+
+
+# Wait for the specified duration
+sleep $duration
+
+
+
+# Resume the komodoro service
+
+systemctl --user start komodoro.timer
 
 EOF
 
-chmod +x ~/.local/bin/komodoro-remove
+# Create an Appstarter asking for input for stopping --------------------------------
 
+    cat > ~/.local/share/applications/pause-komodoro.desktop << EOF
+[Desktop Entry]
+Type=Application
+Name=Pause Komodoro
+Comment=Pause the Komodoro screenlocking timer
+Exec=bash -c 'duration=$(kdialog --title "Pause Screensaver" --inputbox "For how long do you want to pause the screensaver service? (in minutes):"); /bin/bash ~/.local/share/kservices5/komodoro-pause $duration'
+Icon=rotation-locked-landscape-symbolic
+Terminal=false
+Categories=System;
+EOF
 
-
-# Loop end-------------------------------
-
+    # Enable and start the timer
+    systemctl --user enable komodoro.timer
+    systemctl --user start komodoro.timer
 
     echo "Service and timer installed successfully. Make a break in 30min."
 else

@@ -9,7 +9,3 @@ Install
 ```
 curl -s https://github.com/trytomakeyouprivate/Komodoro/raw/main/komodoro-install | bash -s
 ```
-
-## Important ToDos
-
-implement stop feature

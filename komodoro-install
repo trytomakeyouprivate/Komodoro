@@ -123,6 +123,31 @@ Terminal=false
 Categories=System;
 EOF
 
+cat > ~/.local/bin/komodoro-remove << EOF
+#!/bin/bash
+
+uninstall_komodoro() {
+    systemctl --user stop komodoro.timer
+    systemctl --user disable komodoro.timer
+    rm -f ~/.local/share/kservices5/komodoro
+    rm -f ~/.local/share/kservices5/komodoro-pause
+    rm -f ~/.local/share/applications/pause-komodoro.desktop
+    rm -f ~/.config/systemd/user/komodoro.service
+    "
+}
+
+while true; do
+    read -p "Do you really want to uninstall Komodoro? (y/n) > " yn
+    case $yn in
+        [Yy]* ) uninstall_komodoro && break;;
+        [Nn]* ) echo "Uninstallation cancelled." && break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+EOF
+
+chmod +x ~/.local/bin/komodoro-remove
+
     # Enable and start the timer
     systemctl --user enable komodoro.timer
     systemctl --user start komodoro.timer

@@ -9,3 +9,20 @@ Install
 ```
 curl -s https://github.com/trytomakeyouprivate/Komodoro/raw/main/komodoro-install | bash -s
 ```
+
+
+
+## Todo
+
+display these messages when unlocked
+
+```
+notify-send -a "Komodoro" "Working time!" "30 minutes left"
+sleep 600
+notify-send -a "Komodoro" "Working time!" "20 minutes left"
+sleep 600
+notify-send -a "Komodoro" "Working time!" "10 minutes left"
+sleep 300
+notify-send -a "Komodoro" "Working time!" "5 minutes left"
+sleep 300
+```

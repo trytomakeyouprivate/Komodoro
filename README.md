@@ -14,7 +14,7 @@ curl -s https://github.com/trytomakeyouprivate/Komodoro/raw/main/komodoro-instal
 
 ## Todo
 
-display these messages when unlocked
+- display these messages when unlocked
 
 ```
 notify-send -a "Komodoro" "Working time!" "30 minutes left"
@@ -26,3 +26,6 @@ sleep 300
 notify-send -a "Komodoro" "Working time!" "5 minutes left"
 sleep 300
 ```
+
+- check if timer continues even with locked screen, avoid that
+- test!

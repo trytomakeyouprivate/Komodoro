@@ -10,7 +10,8 @@ Install
 curl -s https://github.com/trytomakeyouprivate/Komodoro/raw/main/komodoro-install | bash -s
 ```
 
-
+## Note
+This is just a fun small project. I actually think KDEs preinstalled "Focus" is better, and you can easily run scripts at pause, locking the screen.
 
 ## Todo
 

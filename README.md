@@ -1,4 +1,7 @@
 # Komodoro 🍅⏰🔒
+
+***not yet tested!***
+
 A KDE-native "pomodoro timer" locking the screen every half hour for 5 minutes, so that you take a break.
 
 - After login your screen will be locked in 30min for 5min, like "pomodoro" but in KDE-wide
